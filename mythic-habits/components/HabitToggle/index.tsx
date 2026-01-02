@@ -1,4 +1,5 @@
-import { FC, useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FC, useEffect, useState } from "react";
 import {
     Pressable,
     StyleSheet,
@@ -6,6 +7,7 @@ import {
     TextStyle,
     ViewStyle
 } from "react-native";
+
 
 type Props = {
 value: boolean;
@@ -31,12 +33,25 @@ const handlePress = () => {
     onToggle?.(!value);
 };
 const [done, setDone] = useState(false);
+const key = `habit-${label}`;
+
+useEffect(() => {
+    AsyncStorage.getItem(key).then(value => {
+      if (value !== null) setDone(JSON.parse(value));
+    });
+}, []);
+
+const toggle = async () => {
+    const newValue = !done;
+    setDone(newValue);
+    await AsyncStorage.setItem(key, JSON.stringify(newValue));
+  };
 
 
 
 return (
     <Pressable
-      onPress={() => setDone(!done)}
+      onPress={toggle}
       style={[styles.button, done && styles.done]}
     >
       <Text style={styles.text}>{label}</Text>
